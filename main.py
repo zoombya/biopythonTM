@@ -40,15 +40,6 @@ if sequences:
         elif method == "Tm_GC":
             st.info("Empirical GC-based method with salt and mismatch corrections.")
             valueset = st.number_input("Valueset", min_value=1, max_value=10, value=7, step=1)
-            userset_str = st.text_input("User-defined set (A,B,C,D) [optional]", value="")
-            try:
-                userset = tuple(float(x.strip()) for x in userset_str.split(",")) if userset_str else None
-                if userset and len(userset) != 4:
-                    st.error("User-defined set must contain 4 numbers.")
-                    userset = None
-            except Exception:
-                st.error("Error parsing user-defined set.")
-                userset = None
             na_conc = st.number_input("Na⁺ (mM)", min_value=0.0, value=50.0, step=0.1)
             k_conc = st.number_input("K⁺ (mM)", min_value=0.0, value=0.0, step=0.1)
             tris_conc = st.number_input("Tris (mM)", min_value=0.0, value=0.0, step=0.1)
@@ -59,17 +50,13 @@ if sequences:
         
         elif method == "Tm_NN":
             st.info("Nearest Neighbor thermodynamics calculation.")
-            c_seq = st.text_input("Complementary sequence (optional)", value="")
-            shift = st.number_input("Shift (offset)", value=0, step=1)
             nn_table = st.selectbox("Nearest Neighbor Table", 
                                     options=["DNA_NN1", "DNA_NN2", "DNA_NN3", "DNA_NN4",
                                              "RNA_NN1", "RNA_NN2", "RNA_NN3", "R_DNA_NN1"])
             tmm_table = st.selectbox("Terminal Mismatch Table", options=["DNA_TMM1"])
             imm_table = st.selectbox("Internal Mismatch Table", options=["DNA_IMM1"])
             de_table = st.selectbox("Dangling End Table", options=["DNA_DE1", "RNA_DE1"])
-            dnac1 = st.number_input("DNA Concentration 1 (nM)", min_value=0.0, value=25.0, step=0.1)
-            dnac2 = st.number_input("DNA Concentration 2 (nM)", min_value=0.0, value=25.0, step=0.1)
-            selfcomp = st.checkbox("Self-complementary", value=False)
+            dnac1 = st.number_input("DNA Concentration  (nM)", min_value=0.0, value=25.0, step=0.1)
             na_conc = st.number_input("Na⁺ (mM)", min_value=0.0, value=50.0, step=0.1)
             k_conc = st.number_input("K⁺ (mM)", min_value=0.0, value=0.0, step=0.1)
             tris_conc = st.number_input("Tris (mM)", min_value=0.0, value=0.0, step=0.1)
@@ -85,6 +72,7 @@ if sequences:
     with col_output:
         st.header("Output")
         for s in sequences:
+            seq_len = len(s)
             try:
                 seq_obj = Seq(s)
                 if method == "Tm_Wallace":
@@ -95,12 +83,11 @@ if sequences:
                         check=check,
                         strict=strict,
                         valueset=valueset,
-                        userset=userset,
-                        Na=na_conc * 1e-3,     # Convert mM to M
-                        K=k_conc * 1e-3,
-                        Tris=tris_conc * 1e-3,
-                        Mg=mg_conc * 1e-3,
-                        dNTPs=dntp_conc * 1e-3,
+                        Na=na_conc,      # Accept salt in mM
+                        K=k_conc,
+                        Tris=tris_conc,
+                        Mg=mg_conc,
+                        dNTPs=dntp_conc,
                         saltcorr=saltcorr,
                         mismatch=mismatch
                     )
@@ -109,28 +96,24 @@ if sequences:
                         seq_obj,
                         check=check,
                         strict=strict,
-                        c_seq=c_seq.strip() if c_seq.strip() else None,
-                        shift=shift,
                         nn_table=nn_table_obj,
                         tmm_table=tmm_table_obj,
                         imm_table=imm_table_obj,
                         de_table=de_table_obj,
-                        dnac1=dnac1 * 1e-9,    # Convert nM to M
-                        dnac2=dnac2 * 1e-9,
-                        selfcomp=selfcomp,
-                        Na=na_conc * 1e-3,
-                        K=k_conc * 1e-3,
-                        Tris=tris_conc * 1e-3,
-                        Mg=mg_conc * 1e-3,
-                        dNTPs=dntp_conc * 1e-3,
+                        dnac1=dnac1,
+                        Na=na_conc,
+                        K=k_conc,
+                        Tris=tris_conc,
+                        Mg=mg_conc,
+                        dNTPs=dntp_conc,
                         saltcorr=saltcorr
                     )
-                results.append((s, tm))
+                results.append((s, seq_len, tm))
             except Exception as e:
-                results.append((s, f"Error: {e}"))
+                results.append((s, seq_len, f"Error: {e}"))
         
         # Generate enlarged histogram using Altair with bins 5°C apart.
-        num_tms = [tm for _, tm in results if isinstance(tm, (int, float))]
+        num_tms = [tm for _, _, tm in results if isinstance(tm, (int, float))]
         if len(num_tms) > 1:
             df_hist = pd.DataFrame({"Tm (°C)": num_tms})
             hist_chart = alt.Chart(df_hist).mark_bar().encode(
@@ -141,7 +124,11 @@ if sequences:
         
         # --- Zone 3: Full-Width Data Frame ---
         if sequences:
-            df = pd.DataFrame(results, columns=["Sequence", "Tm (°C)"])
-            df.sort_values("Tm (°C)", ascending=False, inplace=True)
+            df = pd.DataFrame(results, columns=["Sequence", "Length", "Tm (°C)"])
+            try:
+                df["Tm (°C)"] = pd.to_numeric(df["Tm (°C)"], errors='coerce')
+                df.sort_values("Tm (°C)", ascending=False, inplace=True)
+            except Exception:
+                pass
             st.subheader("Detailed Results")
             st.dataframe(df)
