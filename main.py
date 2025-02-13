@@ -53,9 +53,9 @@ if sequences:
             nn_table = st.selectbox("Nearest Neighbor Table", 
                                     options=["DNA_NN1", "DNA_NN2", "DNA_NN3", "DNA_NN4",
                                              "RNA_NN1", "RNA_NN2", "RNA_NN3", "R_DNA_NN1"])
-            tmm_table = st.selectbox("Terminal Mismatch Table", options=["DNA_TMM1"])
-            imm_table = st.selectbox("Internal Mismatch Table", options=["DNA_IMM1"])
-            de_table = st.selectbox("Dangling End Table", options=["DNA_DE1", "RNA_DE1"])
+            #tmm_table = st.selectbox("Terminal Mismatch Table", options=["DNA_TMM1"])
+            #imm_table = st.selectbox("Internal Mismatch Table", options=["DNA_IMM1"])
+            #de_table = st.selectbox("Dangling End Table", options=["DNA_DE1", "RNA_DE1"])
             dnac1 = st.number_input("DNA Concentration  (nM)", min_value=0.0, value=25.0, step=0.1)
             na_conc = st.number_input("Na⁺ (mM)", min_value=0.0, value=50.0, step=0.1)
             k_conc = st.number_input("K⁺ (mM)", min_value=0.0, value=0.0, step=0.1)
@@ -64,9 +64,9 @@ if sequences:
             dntp_conc = st.number_input("dNTPs (mM)", min_value=0.0, value=0.0, step=0.1)
             saltcorr = st.number_input("Salt Correction Type (0=none, 1–7)", min_value=0, max_value=7, value=5, step=1)
             nn_table_obj = getattr(mt, nn_table)
-            tmm_table_obj = getattr(mt, tmm_table)
-            imm_table_obj = getattr(mt, imm_table)
-            de_table_obj = getattr(mt, de_table)
+            #tmm_table_obj = getattr(mt, tmm_table)
+            #mm_table_obj = getattr(mt, imm_table)
+            #de_table_obj = getattr(mt, de_table)
     
     # --- Output in Left Column ---
     with col_output:
@@ -97,9 +97,9 @@ if sequences:
                         check=check,
                         strict=strict,
                         nn_table=nn_table_obj,
-                        tmm_table=tmm_table_obj,
-                        imm_table=imm_table_obj,
-                        de_table=de_table_obj,
+                        #tmm_table=tmm_table_obj,
+                        #imm_table=imm_table_obj,
+                        #de_table=de_table_obj,
                         dnac1=dnac1,
                         Na=na_conc,
                         K=k_conc,
