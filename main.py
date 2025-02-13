@@ -143,5 +143,3 @@ with col_output:
         
         st.dataframe(df)
         
-        
-        
