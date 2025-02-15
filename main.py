@@ -56,7 +56,7 @@ if sequences:
             #tmm_table = st.selectbox("Terminal Mismatch Table", options=["DNA_TMM1"])
             #imm_table = st.selectbox("Internal Mismatch Table", options=["DNA_IMM1"])
             #de_table = st.selectbox("Dangling End Table", options=["DNA_DE1", "RNA_DE1"])
-            dnac1 = st.number_input("DNA Concentration  (nM)", min_value=0.0, value=25.0, step=0.1)
+            dnac1 = st.number_input("DNA Concentration  (nM)", min_value=0.0, value=99514.80, step=0.1)
             na_conc = st.number_input("Na⁺ (mM)", min_value=0.0, value=50.0, step=0.1)
             k_conc = st.number_input("K⁺ (mM)", min_value=0.0, value=0.0, step=0.1)
             tris_conc = st.number_input("Tris (mM)", min_value=0.0, value=0.0, step=0.1)
